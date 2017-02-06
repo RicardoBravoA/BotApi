@@ -51,7 +51,7 @@ class DbHandler {
     */
 
     // Message
-    public function postMessage($message, $id){
+    public function postMessage($message, $id, $operation_id, $property_id){
         $response = array();
         $stmt = $this->conn->prepare("SELECT message_default_id, message, id, response_1, response_2, response_type_id FROM message_default WHERE message LIKE ? AND id = ?");
         $stmt->bind_param("ss", $message, $id);
@@ -86,6 +86,7 @@ class DbHandler {
                             $_meta["status"]="success";
                             $_meta["code"]="200";
                             $response["_meta"] = $_meta;
+                            $response["type"] = "operation";
                             $response["operation"] = $data2;
                             $response["message"] = $data1;
                             $stmt->close();
@@ -104,11 +105,97 @@ class DbHandler {
                     }
 
 
+                } else if($response_type_id == 3){
+                    $response = array();
+                    $data1 = array();
+                    $data1["response_1"] = $response_1;
+                    $data1["response_2"] = $response_2;
+                    $data1["response_type_id"] = $response_type_id;
+
+                    $stmt2 = $this->conn->prepare("SELECT property_type_id, property_id, property_description FROM property_type");
+                    if($stmt2->execute()){
+                        $stmt2->bind_result($operation_type_id, $operation_id, $operation_description);
+                        $stmt2->store_result();
+                        if($stmt2->num_rows>0){
+                            $data2 = array();
+                            while ($stmt2->fetch()) {
+                                $tmp2 = array();
+                                $tmp2["property_type_id"] = $operation_type_id;
+                                $tmp2["property_id"] = $operation_id;
+                                $tmp2["property_description"] = $operation_description;
+                                array_push($data2, $tmp2);
+                            }
+
+                            $_meta = array();
+                            $_meta["status"]="success";
+                            $_meta["code"]="200";
+                            $response["_meta"] = $_meta;
+                            $response["type"] = "property";
+                            $response["property"] = $data2;
+                            $response["message"] = $data1;
+                            $stmt->close();
+                            return $response;
+                        }else{
+                            $meta = array();
+                            $meta["status"] = "error";
+                            $meta["code"] = "101";
+                            $response["_meta"] = $meta;
+                        }
+                    }else{
+                        $meta = array();
+                        $meta["status"] = "error";
+                        $meta["code"] = "100";
+                        $response["_meta"] = $meta;
+                    }
+                } else if($response_type_id == 4){
+                    $response = array();
+                    $data1 = array();
+                    $data1["response_1"] = $response_1;
+                    $data1["response_2"] = $response_2;
+                    $data1["response_type_id"] = $response_type_id;
+
+                    $stmt2 = $this->conn->prepare("SELECT property_id, image, title, price, money_type, url, operation_type_id, property_type_id FROM property WHERE operation_type_id = ? AND property_type_id = ?");
+                    $stmt2->bind_param("ss", $operation_id, $property_id);
+                    if($stmt2->execute()){
+                        $stmt2->bind_result($property_id, $image, $title, $price, $money_type, $url, $operation_type_id, $property_type_id);
+                        $stmt2->store_result();
+                        if($stmt2->num_rows>0){
+                            $data2 = array();
+                            while ($stmt2->fetch()) {
+                                $tmp2 = array();
+                                $tmp2["property_id"] = $property_id;
+                                $tmp2["image"] = $image;
+                                $tmp2["title"] = $title;
+                                $tmp2["price"] = $price;
+                                $tmp2["money_type"] = $money_type;
+                                $tmp2["url"] = $url;
+                                $tmp2["operation_type_id"] = $operation_type_id;
+                                $tmp2["property_type_id"] = $property_type_id;
+                                array_push($data2, $tmp2);
+                            }
+
+                            $_meta = array();
+                            $_meta["status"]="success";
+                            $_meta["code"]="200";
+                            $response["_meta"] = $_meta;
+                            $response["type"] = "property";
+                            $response["property"] = $data2;
+                            $response["message"] = $data1;
+                            $stmt->close();
+                            return $response;
+                        }else{
+                            $meta = array();
+                            $meta["status"] = "error";
+                            $meta["code"] = "101";
+                            $response["_meta"] = $meta;
+                        }
+                    }else{
+                        $meta = array();
+                        $meta["status"] = "error";
+                        $meta["code"] = "100";
+                        $response["_meta"] = $meta;
+                    }
                 }
-
-
-
-
                 
             }else{
                 $meta = array();
@@ -124,60 +211,6 @@ class DbHandler {
         }
 
         return $response;
-    }
-
-    //Greetings
-    //public function greeting($response_1, $response_2, $response_type_id){
-    public function myFunction(){
-        $response = array();
-        //$data1 = array();
-        /*
-        $tmp1 = array();
-        $tmp1["response_1"] = $response_1;
-        $tmp1["response_2"] = $response_2;
-        $tmp1["response_type_id"] = $response_type_id;
-        array_push($data1, $tmp1);
-        */
-        $response["data"] = "hola";
-        return $response;
-        /*
-        $stmt = $this->conn->prepare("SELECT operation_type_id, operation_id, operation_description FROM operation_type");
-        if($stmt->execute()){
-            $stmt->bind_result($operation_type_id, $operation_id, $operation_description);
-            $stmt->store_result();
-            if($stmt->num_rows>0){
-                $data = array();
-                while ($stmt->fetch()) {
-                    $tmp = array();
-                    $tmp["operation_type_id"] = $operation_type_id;
-                    $tmp["operation_id"] = $operation_id;
-                    $tmp["operation_description"] = $operation_description;
-                    array_push($data, $tmp);
-                }
-
-                $_meta = array();
-                $_meta["status"]="success";
-                $_meta["code"]="200";
-                $response["_meta"] = $_meta;
-                $response["operation"] = $data;
-                $response["message"] = $data1;
-                $stmt->close();
-                return $response;
-            }else{
-                $meta = array();
-                $meta["status"] = "error";
-                $meta["code"] = "101";
-                $response["_meta"] = $meta;
-            }
-        }else{
-            $meta = array();
-            $meta["status"] = "error";
-            $meta["code"] = "100";
-            $response["_meta"] = $meta;
-        }
-        */
-        //return $response;
-
     }
 
     // Synchronize

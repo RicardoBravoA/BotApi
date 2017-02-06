@@ -10,6 +10,10 @@ class DbHandler {
         $this->conn = $db->connect();
     }
 
+    // Message
+    public function postMessage($message, $id){
+
+    }
 
     // Synchronize
     public function getSynchronize() {

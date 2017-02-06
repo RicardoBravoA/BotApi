@@ -19,6 +19,17 @@
         echoResponse(200, $response);
     });
 
+    // Synchronize
+    $app->post('/message/', function() use ($app) {
+
+        verifyRequiredParams(array('message', 'id'));
+        $message = $app->request->post('message');
+        $id = $app->request->post('id');
+        $db = new DbHandler();
+        $response = $db->postMessage($message, $id);
+        echoResponse(200, $response);
+    });
+
     function echoResponse($status_code, $response) {
         $app = \Slim\Slim::getInstance();
 

@@ -130,7 +130,7 @@ class DbHandler {
                             $_meta["status"]="success";
                             $_meta["code"]="200";
                             $response["_meta"] = $_meta;
-                            $response["type"] = "property";
+                            $response["type"] = "property_type";
                             $response["property_type"] = $data2;
                             $response["message"] = $data1;
                             $stmt->close();

@@ -22,13 +22,12 @@
     // Synchronize
     $app->post('/message/', function() use ($app) {
 
-        verifyRequiredParams(array('message', 'id', 'operation_id', 'property_id'));
+        //verifyRequiredParams(array('message', 'operation', 'property_type'));
         $message = $app->request->post('message');
-        $id = $app->request->post('id');
-        $operation_id = $app->request->post('operation_id');
-        $property_id = $app->request->post('property_id');
+        $operation = $app->request->post('operation');
+        $property_type = $app->request->post('property_type');
         $db = new DbHandler();
-        $response = $db->postMessage($message, $id, $operation_id, $property_id);
+        $response = $db->postMessage($message, $operation, $property_type);
         echoResponse(200, $response);
     });
 

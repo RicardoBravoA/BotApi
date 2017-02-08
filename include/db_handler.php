@@ -51,12 +51,12 @@ class DbHandler {
     */
 
     // Message
-    public function postMessage($message, $id, $operation_id, $property_id){
+    public function postMessage($message, $operation, $property_type){
         $response = array();
-        $stmt = $this->conn->prepare("SELECT message_default_id, message, id, response_1, response_2, response_type_id FROM message_default WHERE message LIKE ? AND id = ?");
-        $stmt->bind_param("ss", $message, $id);
+        $stmt = $this->conn->prepare("SELECT message_default_id, message, operation, property_type, response_1, response_2, response_type_id FROM message_default WHERE message LIKE ? AND operation = ? AND property_type = ?");
+        $stmt->bind_param("sss", $message, $operation, $property_type);
         if($stmt->execute()){
-            $stmt->bind_result($message_default_id, $message, $id, $response_1, $response_2, $response_type_id);
+            $stmt->bind_result($message_default_id, $message, $operation, $property_type, $response_1, $response_2, $response_type_id);
             $stmt->store_result();
             if($stmt->num_rows>0){
                 $stmt->fetch();
@@ -68,17 +68,15 @@ class DbHandler {
                     $data1["response_2"] = $response_2;
                     $data1["response_type_id"] = $response_type_id;
 
-                    $stmt2 = $this->conn->prepare("SELECT operation_type_id, operation_id, operation_description FROM operation_type");
+                    $stmt2 = $this->conn->prepare("SELECT DISTINCT operation FROM message_default WHERE operation != '' ORDER BY operation");
                     if($stmt2->execute()){
-                        $stmt2->bind_result($operation_type_id, $operation_id, $operation_description);
+                        $stmt2->bind_result($operation);
                         $stmt2->store_result();
                         if($stmt2->num_rows>0){
                             $data2 = array();
                             while ($stmt2->fetch()) {
                                 $tmp2 = array();
-                                $tmp2["operation_type_id"] = $operation_type_id;
-                                $tmp2["operation_id"] = $operation_id;
-                                $tmp2["operation_description"] = $operation_description;
+                                $tmp2["operation"] = $operation;
                                 array_push($data2, $tmp2);
                             }
 
@@ -112,17 +110,15 @@ class DbHandler {
                     $data1["response_2"] = $response_2;
                     $data1["response_type_id"] = $response_type_id;
 
-                    $stmt2 = $this->conn->prepare("SELECT property_type_id, property_id, property_description FROM property_type");
+                    $stmt2 = $this->conn->prepare("SELECT DISTINCT property_type FROM message_default WHERE property_type != '' ORDER BY property_type");
                     if($stmt2->execute()){
-                        $stmt2->bind_result($operation_type_id, $operation_id, $operation_description);
+                        $stmt2->bind_result($property_type);
                         $stmt2->store_result();
                         if($stmt2->num_rows>0){
                             $data2 = array();
                             while ($stmt2->fetch()) {
                                 $tmp2 = array();
-                                $tmp2["property_type_id"] = $operation_type_id;
-                                $tmp2["property_id"] = $operation_id;
-                                $tmp2["property_description"] = $operation_description;
+                                $tmp2["property_type"] = $property_type;
                                 array_push($data2, $tmp2);
                             }
 
@@ -154,10 +150,10 @@ class DbHandler {
                     $data1["response_2"] = $response_2;
                     $data1["response_type_id"] = $response_type_id;
 
-                    $stmt2 = $this->conn->prepare("SELECT property_id, image, title, price, money_type, url, operation_type_id, property_type_id FROM property WHERE operation_type_id = ? AND property_type_id = ?");
-                    $stmt2->bind_param("ss", $operation_id, $property_id);
+                    $stmt2 = $this->conn->prepare("SELECT property_id, image, title, price, money_type, url, operation, property_type FROM property WHERE operation = ? AND property_type = ?");
+                    $stmt2->bind_param("ss", $operation, $property_type);
                     if($stmt2->execute()){
-                        $stmt2->bind_result($property_id, $image, $title, $price, $money_type, $url, $operation_type_id, $property_type_id);
+                        $stmt2->bind_result($property_id, $image, $title, $price, $money_type, $url, $operation, $property_type);
                         $stmt2->store_result();
                         if($stmt2->num_rows>0){
                             $data2 = array();
@@ -169,8 +165,8 @@ class DbHandler {
                                 $tmp2["price"] = $price;
                                 $tmp2["money_type"] = $money_type;
                                 $tmp2["url"] = $url;
-                                $tmp2["operation_type_id"] = $operation_type_id;
-                                $tmp2["property_type_id"] = $property_type_id;
+                                $tmp2["operationType"] = $operation;
+                                $tmp2["propertyType"] = $property_type;
                                 array_push($data2, $tmp2);
                             }
 

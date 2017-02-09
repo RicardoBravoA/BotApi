@@ -10,16 +10,7 @@
 
     $app = new \Slim\Slim();
 
-
-    // Synchronize
-    $app->get('/synchronize/', function() use ($app) {
-
-        $db = new DbHandler();
-        $response = $db->getSynchronize();
-        echoResponse(200, $response);
-    });
-
-    // Synchronize
+    // Message
     $app->post('/message/', function() use ($app) {
 
         //verifyRequiredParams(array('message', 'operation', 'property_type'));
@@ -28,17 +19,8 @@
         $property_type = $app->request->post('property_type');
         $db = new DbHandler();
         $response = $db->postMessage($message, $operation, $property_type);
-        echoResponse(200, $response);
+        //echoResponse(200, $response);
     });
-
-    function echoResponse($status_code, $response) {
-        $app = \Slim\Slim::getInstance();
-
-        $app->status($status_code);
-        $app->contentType('application/json');
-
-        echo json_encode($response);
-    }
 
     function verifyRequiredParams($required_fields) {
         $error = false;
@@ -68,6 +50,16 @@
             echoResponse(400, $response);
             $app->stop();
         }
+    }
+
+    function echoResponse($isError, $response) {
+        $app = \Slim\Slim::getInstance();
+        $app->status(200);
+        if($isError){
+            $app->status(500);
+        }
+        $app->contentType('application/json');
+        echo json_encode($response);
     }
 
     $app->run();
